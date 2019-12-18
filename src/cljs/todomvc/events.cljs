@@ -11,8 +11,8 @@
 (def spec-check (re-frame/after (partial throw-if-invalid :todomvc.db/db)))
 (def task-interceptors [spec-check])
 
-;; TODO: path para evitar tener db en todos lados.
-;; TODO: Local storage
+;; TODO: path interceptor
+;; TODO: Local storage interceptor
 
 ;; TODO: Review this.
 (def id (atom 0))
