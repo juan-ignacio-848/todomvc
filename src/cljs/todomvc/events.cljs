@@ -11,7 +11,6 @@
 (def spec-check (after (partial throw-if-invalid :todomvc.db/db)))
 (def task-interceptors [spec-check (path :tasks)])
 
-;; TODO: path interceptor
 ;; TODO: Local storage interceptor
 
 ;; TODO: Review this.
