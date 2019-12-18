@@ -1,9 +1,19 @@
 (ns todomvc.events
   (:require
    [re-frame.core :as re-frame]
-   [todomvc.db :as db]))
+   [todomvc.db :as db]
+   [cljs.spec.alpha :as s]))
 
 ;; TODO: Interceptors (spec)
+(def spec-check
+  {:id     :spec-check
+   :before identity
+   :after  (fn [context]
+             (let [{:keys [db]} (:effects context)]
+               (when-not (s/valid? :todomvc.db/db db)
+                 (throw (ex-info (str "spec check failed: ") (s/explain-str :todomvc.db/db db) {}))))
+             context)})
+
 ;; TODO: path para evitar tener db en todos lados.
 ;; TODO: Local storage
 
@@ -21,6 +31,7 @@
 
 (re-frame/reg-event-db
   :add-task
+  [spec-check]
   (fn [db [_ new-task]]
     (let [id (next-id!)]
       (assoc-in db
