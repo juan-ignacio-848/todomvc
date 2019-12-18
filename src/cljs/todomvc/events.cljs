@@ -5,14 +5,9 @@
    [cljs.spec.alpha :as s]))
 
 ;; TODO: Interceptors (spec)
-(def spec-check
-  {:id     :spec-check
-   :before identity
-   :after  (fn [context]
-             (let [{:keys [db]} (:effects context)]
-               (when-not (s/valid? :todomvc.db/db db)
-                 (throw (ex-info (str "spec check failed: ") (s/explain-str :todomvc.db/db db) {}))))
-             context)})
+(def spec-check (re-frame/after (fn [db event]
+                                  (when-not (s/valid? :todomvc.db/db db)
+                                    (throw (ex-info (str "spec check failed: " (s/explain-str :todomvc.db/db db)) {}))))))
 
 ;; TODO: path para evitar tener db en todos lados.
 ;; TODO: Local storage
