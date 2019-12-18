@@ -50,7 +50,7 @@
 
 (re-frame/reg-event-db
   :update-showing
-  task-interceptors
+  spec-check
   (fn [db [_ showing]]
     (assoc db :showing showing)))
 
