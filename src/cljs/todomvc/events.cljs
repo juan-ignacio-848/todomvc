@@ -1,6 +1,6 @@
 (ns todomvc.events
   (:require
-   [re-frame.core :as re-frame]
+   [re-frame.core :as re-frame :refer [reg-event-db after path]]
    [todomvc.db :as db]
    [cljs.spec.alpha :as s]))
 
@@ -8,8 +8,8 @@
   (when-not (s/valid? spec db)
     (throw (ex-info (str "spec check failed: " (s/explain-str spec db)) {}))))
 
-(def spec-check (re-frame/after (partial throw-if-invalid :todomvc.db/db)))
-(def task-interceptors [spec-check])
+(def spec-check (after (partial throw-if-invalid :todomvc.db/db)))
+(def task-interceptors [spec-check (path :tasks)])
 
 ;; TODO: path interceptor
 ;; TODO: Local storage interceptor
@@ -21,42 +21,44 @@
     (swap! id inc)
     current-id))
 
-(re-frame/reg-event-db
+(reg-event-db
  ::initialize-db
  (fn [_ _]
    task-interceptors
    db/default-db))
 
-(re-frame/reg-event-db
+(reg-event-db
   :add-task
   task-interceptors
-  (fn [db [_ new-task]]
+  (fn [tasks [_ new-task]]
     (let [id (next-id!)]
-      (assoc-in db
-                [:tasks id]
-                {:id id :description new-task :done false}))))
+      (assoc tasks id {:id id :description new-task :done false}))))
 
-(re-frame/reg-event-db
+(reg-event-db
   :toggle-done
   task-interceptors
-  (fn [db [_ id]]
-    (update-in db [:tasks id :done] not)))
+  (fn [tasks [_ id]]
+    (update-in tasks [id :done] not)))
 
-(re-frame/reg-event-db
+(reg-event-db
   :delete-task
   task-interceptors
-  (fn [db [_ id]]
-    (update-in db [:tasks] dissoc id)))
+  (fn [tasks [_ id]]
+    (dissoc tasks id)))
 
-(re-frame/reg-event-db
+(reg-event-db
   :update-showing
   spec-check
   (fn [db [_ showing]]
     (assoc db :showing showing)))
 
-(re-frame/reg-event-db
+(reg-event-db
   :clear-completed
   task-interceptors
-  (fn [db [_ _]]
-    (let [completed-tasks (into {} (filter #(false? (:done (val %))) (:tasks db)))]
-      (assoc db :tasks completed-tasks))))
+  (fn [tasks [_ _]]
+    (reduce-kv (fn [m k v]
+                 (if (not (:done v))
+                   (assoc m k v)
+                   m))
+               {}
+               tasks)))
