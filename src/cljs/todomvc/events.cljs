@@ -46,6 +46,12 @@
     (dissoc tasks id)))
 
 (reg-event-db
+  :edit-task
+  task-interceptors
+  (fn [tasks [_ id description]]
+    (assoc-in tasks [id :description] description)))
+
+(reg-event-db
   :update-showing
   spec-check
   (fn [db [_ showing]]

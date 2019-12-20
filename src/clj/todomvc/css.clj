@@ -62,14 +62,16 @@
    [:.content {:grid-area      "content"
                :display        "flex"
                :flex-direction "column"
-               :margin-bottom "30px"}
-    [:.task-entry {:padding     "16px 16px 16px 60px"
-                   :font-size   task-font-size
-                   :font-family "inherit"
-                   :border      "none"
-                   :box-shadow  "inset 0 -2px 1px rgba(0, 0, 0, 0.2)"}
-     [(gs/& placeholder) {:color      task-entry-text-color
-                          :font-style "italic"}]]]])
+               :margin-bottom "30px"}]])
+
+(defn task-entry []
+  [:.task-entry {:padding     "16px 16px 16px 60px"
+                 :font-size   task-font-size
+                 :font-family "inherit"
+                 :border      "none"
+                 :box-shadow  "inset 0 -2px 1px rgba(0, 0, 0, 0.2)"}
+   [(gs/& placeholder) {:color      task-entry-text-color
+                        :font-style "italic"}]])
 
 (defn task-list []
   [:.task-list {:list-style "none"}])
@@ -85,11 +87,13 @@
               :background-repeat "no-repeat"
               :background-position "center"
               :width "40px"}]
-   [:label {:padding "16px 16px 16px 16px"
-            :color task-active-color
-            :flex-grow 1
-            :font-size task-font-size
-            :word-break "break-all"}]
+   [:.task-content {:flex-grow  1
+                    :padding    "16px 16px 16px 16px"}
+    [:input {:box-shadow "none"
+             :padding 0}]
+    [:label {:color      task-active-color
+             :font-size  task-font-size
+             :word-break "break-all"}]]
    [(gs/& gs/hover) [:.delete-btn {:display "block"}]]
    [:.delete-btn {:display "none"
                   :color delete-btn-color
@@ -162,6 +166,7 @@
             (container)
             (task-list)
             (task)
+            (task-entry)
             (completed-task)
             (controls)
             (footer)])

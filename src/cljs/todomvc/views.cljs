@@ -16,7 +16,7 @@
   [:header.header
    [:h1 "todos"]])
 
-(defn task-entry [{:keys [on-save on-stop]}]
+(defn task-entry [{:keys [id on-save on-stop]}]
   (let [val (reagent/atom "")
         stop #(do (reset! val "")
                   (when on-stop (on-stop)))
@@ -62,14 +62,25 @@
 (defn task-style [done]
   (str "task" (when done " completed")))
 
+(defn todo-item []
+  (let [editing (reagent/atom false)]
+    (fn [{:keys [id description done]} showing]
+      [:li {:key id :style {:display (display done showing)}}
+       [:div {:class           (task-style done)
+              :on-double-click #(reset! editing true)}
+        [:input.toggle {:type "checkbox" :checked done :on-change #(dispatch [:toggle-done id])}]
+        [:div.task-content
+         (if @editing
+           [task-entry {:on-save #(when (seq %)
+                                    (dispatch [:edit-task id %]))
+                        :on-stop #(reset! editing false)}]
+           [:label description])]
+        [:button.delete-btn {:on-click #(dispatch [:delete-task id])} "×"]]])))
+
 (defn task-list [tasks showing]
   [:ul.task-list
-   (for [[_ {id :id description :description done :done}] tasks]
-     [:li {:key id :style {:display (display done showing)}}
-      [:div {:class (task-style done)}
-       [:input.toggle {:type "checkbox" :checked done :on-change #(dispatch [:toggle-done id])}]
-       [:label description]
-       [:button.delete-btn {:on-click #(dispatch [:delete-task id])} "×"]]])])
+   (for [[_ task] tasks]
+     ^{:key (:id task)} [todo-item task showing])])
 
 (defn tasks-container []
   [:div.content
