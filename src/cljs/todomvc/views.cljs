@@ -9,7 +9,7 @@
 (defn footer []
   [:footer.footer
    [:p "Double-click to edit a todo"]
-   [:p "Credits: Matthew Jaoudi, Dmitri Sotnikov, and Dan Holmsand"]
+   [:p "Created by nmkip"]
    [:p "Part of TodoMVC"]])
 
 (defn title []
