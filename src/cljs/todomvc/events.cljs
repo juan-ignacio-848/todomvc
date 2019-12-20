@@ -1,6 +1,6 @@
 (ns todomvc.events
   (:require
-   [re-frame.core :as re-frame :refer [reg-event-db after path]]
+   [re-frame.core :as re-frame :refer [reg-event-db reg-event-fx inject-cofx after path]]
    [todomvc.db :as db]
    [cljs.spec.alpha :as s]))
 
@@ -8,19 +8,18 @@
   (when-not (s/valid? spec db)
     (throw (ex-info (str "spec check failed: " (s/explain-str spec db)) {}))))
 
+(def ->localstore (after (fn [db] (db/tasks->localstorage (:tasks db)))))
 (def spec-check (after (partial throw-if-invalid :todomvc.db/db)))
-(def task-interceptors [spec-check (path :tasks)])
-
-;; TODO: Local storage interceptor
+(def task-interceptors [->localstore spec-check (path :tasks)])
 
 (defn next-id [tasks]
   ((fnil inc 0) (last (keys tasks))))
 
-(reg-event-db
+(reg-event-fx
  ::initialize-db
- (fn [_ _]
-   task-interceptors
-   db/default-db))
+ [(inject-cofx :local-store-tasks) spec-check]
+ (fn [{:keys [local-store-tasks]} _]
+   {:db (assoc db/default-db :tasks local-store-tasks)}))
 
 (reg-event-db
   :add-task
