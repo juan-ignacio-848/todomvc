@@ -10,6 +10,11 @@
 
 (def ->localstore (after (fn [db] (db/tasks->localstorage (:tasks db)))))
 (def spec-check (after (partial throw-if-invalid :todomvc.db/db)))
+
+;; interceptor chain
+;;before  ------> ,,, ------> ,,, ------> path :tasks v
+;;                                                    v
+;;after   ------  ls <------ spec <------ ,,, <<<<<<<<v
 (def task-interceptors [->localstore spec-check (path :tasks)])
 
 (defn next-id [tasks]
