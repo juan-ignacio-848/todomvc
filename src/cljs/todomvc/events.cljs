@@ -13,12 +13,8 @@
 
 ;; TODO: Local storage interceptor
 
-;; TODO: Review this.
-(def id (atom 0))
-(defn next-id! []
-  (let [current-id @id]
-    (swap! id inc)
-    current-id))
+(defn next-id [tasks]
+  ((fnil inc 0) (last (keys tasks))))
 
 (reg-event-db
  ::initialize-db
@@ -30,7 +26,7 @@
   :add-task
   task-interceptors
   (fn [tasks [_ new-task]]
-    (let [id (next-id!)]
+    (let [id (next-id tasks)]
       (assoc tasks id {:id id :description new-task :done false}))))
 
 (reg-event-db
